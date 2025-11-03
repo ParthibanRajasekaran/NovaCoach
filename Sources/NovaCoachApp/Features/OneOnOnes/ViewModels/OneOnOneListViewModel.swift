@@ -61,13 +61,8 @@ final class OneOnOneListViewModel: ObservableObject {
     }
 
     private func saveTranscript(_ text: String) throws -> String {
-        let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-            .appendingPathComponent(UUID().uuidString + ".enc")
-        guard let data = text.data(using: .utf8) else {
-            throw NSError(domain: "OneOnOneListViewModel", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to encode transcript"])
-        }
-        try fileEncryption.encryptAndSave(data, to: url)
-        return url.path
+        let identifier = UUID().uuidString
+        return try fileEncryption.encryptAndSave(text, identifier: identifier)
     }
 
     private func scheduleReminders(for items: [ActionItem]) async throws {

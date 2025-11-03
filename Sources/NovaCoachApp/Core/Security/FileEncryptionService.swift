@@ -6,52 +6,63 @@ import CryptoKit
 enum FileEncryptionError: Error {
     case encryptionFailed
     case decryptionFailed
-    case unsupportedPlatform
+    case noCryptoKitSupport
 }
 
-@MainActor
 protocol FileEncrypting {
-    func encryptAndSave(_ data: Data, to url: URL) throws
-    func decryptData(from url: URL) throws -> Data
+    func encryptAndSave(_ text: String, identifier: String) throws -> String
+    func loadAndDecrypt(path: String) throws -> String
 }
 
 final class FileEncryptionService: FileEncrypting {
-    private let keyProvider: EncryptionKeyProviding
+    private let encryptionKeyProvider: EncryptionKeyProviding
     
-    init(keyProvider: EncryptionKeyProviding) {
-        self.keyProvider = keyProvider
+    init(encryptionKeyProvider: EncryptionKeyProviding) {
+        self.encryptionKeyProvider = encryptionKeyProvider
     }
     
-    func encryptAndSave(_ data: Data, to url: URL) throws {
+    func encryptAndSave(_ text: String, identifier: String) throws -> String {
         #if canImport(CryptoKit)
-        let keyData = try keyProvider.loadOrCreateKey(identifier: "NovaCoach.FileEncryptionKey")
-        let symmetricKey = SymmetricKey(data: keyData)
+        guard let textData = text.data(using: .utf8) else {
+            throw FileEncryptionError.encryptionFailed
+        }
         
-        let sealedBox = try AES.GCM.seal(data, using: symmetricKey)
+        let key = try encryptionKeyProvider.loadOrCreateKey(identifier: "NovaCoach.FileEncryption")
+        let symmetricKey = SymmetricKey(data: key.prefix(32))
+        
+        let sealedBox = try AES.GCM.seal(textData, using: symmetricKey)
         guard let combined = sealedBox.combined else {
             throw FileEncryptionError.encryptionFailed
         }
         
-        try combined.write(to: url, options: .atomic)
+        let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+            .appendingPathComponent(identifier + ".encrypted")
+        try combined.write(to: url, options: .completeFileProtection)
+        
+        return url.path
         #else
-        // Fallback for platforms without CryptoKit: save unencrypted
-        // In production, consider using a different encryption library
-        try data.write(to: url, options: .atomic)
+        throw FileEncryptionError.noCryptoKitSupport
         #endif
     }
     
-    func decryptData(from url: URL) throws -> Data {
+    func loadAndDecrypt(path: String) throws -> String {
         #if canImport(CryptoKit)
+        let url = URL(fileURLWithPath: path)
         let encryptedData = try Data(contentsOf: url)
-        let keyData = try keyProvider.loadOrCreateKey(identifier: "NovaCoach.FileEncryptionKey")
-        let symmetricKey = SymmetricKey(data: keyData)
+        
+        let key = try encryptionKeyProvider.loadOrCreateKey(identifier: "NovaCoach.FileEncryption")
+        let symmetricKey = SymmetricKey(data: key.prefix(32))
         
         let sealedBox = try AES.GCM.SealedBox(combined: encryptedData)
         let decryptedData = try AES.GCM.open(sealedBox, using: symmetricKey)
-        return decryptedData
+        
+        guard let text = String(data: decryptedData, encoding: .utf8) else {
+            throw FileEncryptionError.decryptionFailed
+        }
+        
+        return text
         #else
-        // Fallback for platforms without CryptoKit: read unencrypted
-        return try Data(contentsOf: url)
+        throw FileEncryptionError.noCryptoKitSupport
         #endif
     }
 }
