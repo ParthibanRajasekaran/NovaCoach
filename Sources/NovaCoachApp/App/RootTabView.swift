@@ -27,6 +27,9 @@ struct RootTabView: View {
         .overlay(alignment: .bottomTrailing) {
             VoiceOrbView(assistant: coordinator.voiceAssistant)
             .padding(24)
+            .accessibilityLabel("Voice Assistant")
+            .accessibilityHint(isVoiceActive ? "Double tap to stop voice assistant" : "Double tap to start voice assistant")
+            .accessibilityAddTraits(.isButton)
             .onTapGesture {
                 isVoiceActive.toggle()
                 if isVoiceActive {

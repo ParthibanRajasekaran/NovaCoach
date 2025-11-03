@@ -1,4 +1,7 @@
 import Foundation
+#if canImport(OSLog)
+import OSLog
+#endif
 #if canImport(Porcupine)
 import Porcupine
 #endif
@@ -24,6 +27,9 @@ final class VoiceAssistantService: ObservableObject, VoiceAssistantManaging, @un
     private let speechTranscriber: SpeechTranscribing
     private let synthesizer: SpeechSynthesizing
     private let queue = DispatchQueue(label: "com.novacoach.voiceassistant")
+    #if canImport(OSLog)
+    private let logger = Logger(subsystem: "com.novacoach.app", category: "VoiceAssistant")
+    #endif
     #if canImport(Porcupine)
     private var porcupineManager: PorcupineManager?
     #endif
@@ -53,7 +59,7 @@ final class VoiceAssistantService: ObservableObject, VoiceAssistantManaging, @un
                         self?.synthesizerSpeak("Listening")
                     })
                 } catch {
-                    print("Failed to initialize PorcupineManager: \(error)")
+                    self.logError("Failed to initialize PorcupineManager: \(error.localizedDescription)")
                     self.synthesizerSpeak("Wake word detection is unavailable. Please check your app setup.")
                     return
                 }
@@ -61,7 +67,7 @@ final class VoiceAssistantService: ObservableObject, VoiceAssistantManaging, @un
             do {
                 try self.porcupineManager?.start()
             } catch {
-                print("Failed to start PorcupineManager: \(error)")
+                self.logError("Failed to start PorcupineManager: \(error.localizedDescription)")
                 self.synthesizerSpeak("Wake word detection could not be started.")
                 return
             }
@@ -92,5 +98,13 @@ final class VoiceAssistantService: ObservableObject, VoiceAssistantManaging, @un
 
     private func synthesizerSpeak(_ text: String) {
         Task { await synthesizer.speak(text) }
+    }
+    
+    private func logError(_ message: String) {
+        #if canImport(OSLog)
+        logger.error("\(message)")
+        #else
+        print("ERROR: \(message)")
+        #endif
     }
 }
