@@ -10,17 +10,20 @@ final class OneOnOneListViewModel: ObservableObject {
     private let createUseCase: CreateOneOnOneUseCase
     private let speechTranscriber: SpeechTranscribing
     private let notificationScheduler: NotificationScheduling
+    private let fileEncryption: FileEncrypting
 
     init(
         fetchUseCase: FetchOneOnOneUseCase,
         createUseCase: CreateOneOnOneUseCase,
         speechTranscriber: SpeechTranscribing,
-        notificationScheduler: NotificationScheduling
+        notificationScheduler: NotificationScheduling,
+        fileEncryption: FileEncrypting
     ) {
         self.fetchUseCase = fetchUseCase
         self.createUseCase = createUseCase
         self.speechTranscriber = speechTranscriber
         self.notificationScheduler = notificationScheduler
+        self.fileEncryption = fileEncryption
     }
 
     func load(filter: OneOnOneFilter = OneOnOneFilter()) async {
@@ -58,9 +61,11 @@ final class OneOnOneListViewModel: ObservableObject {
     }
 
     private func saveTranscript(_ text: String) throws -> String {
-        let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-            .appendingPathComponent(UUID().uuidString + ".txt")
-        try text.write(to: url, atomically: true, encoding: .utf8)
+        guard let data = text.data(using: .utf8) else {
+            throw FileEncryptionError.invalidData
+        }
+        let filename = UUID().uuidString + ".enc"
+        let url = try fileEncryption.encryptAndSave(data, filename: filename)
         return url.path
     }
 
