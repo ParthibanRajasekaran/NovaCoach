@@ -109,8 +109,8 @@ final class MockEncryptionKeyProvider: EncryptionKeyProviding {
         if let existing = keys[identifier] {
             return existing
         }
-        // Generate a random 64-byte key
-        let randomBytes = (0..<64).map { _ in UInt8.random(in: .min ... .max) }
+        // Generate a random 32-byte key for AES-256
+        let randomBytes = (0..<32).map { _ in UInt8.random(in: .min ... .max) }
         let key = Data(randomBytes)
         keys[identifier] = key
         return key

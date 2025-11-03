@@ -44,8 +44,7 @@ final class FileEncryptionService: FileEncrypting {
         // Exclude from backup
         var resourceValues = URLResourceValues()
         resourceValues.isExcludedFromBackup = true
-        var mutableURL = fileURL
-        try mutableURL.setResourceValues(resourceValues)
+        try (fileURL as NSURL).setResourceValues(resourceValues)
         
         return fileURL
         #else
