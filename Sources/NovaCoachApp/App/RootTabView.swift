@@ -35,6 +35,9 @@ struct RootTabView: View {
                     coordinator.voiceAssistant.stop()
                 }
             }
+            .accessibilityLabel("Voice Assistant")
+            .accessibilityHint(isVoiceActive ? "Double tap to stop voice assistant" : "Double tap to start voice assistant")
+            .accessibilityAddTraits(.isButton)
         }
     }
 }

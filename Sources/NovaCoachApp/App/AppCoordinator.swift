@@ -17,6 +17,7 @@ final class AppCoordinator: ObservableObject {
     init() {
         speechService = SpeechService()
         notificationScheduler = NotificationScheduler()
+        let fileEncryption = FileEncryptionService(encryptionKeyProvider: KeychainService.shared)
 
         #if canImport(CoreData)
         let stack = CoreDataStack(encryptionKeyProvider: KeychainService.shared)
@@ -47,7 +48,8 @@ final class AppCoordinator: ObservableObject {
             fetchUseCase: fetchMeetings,
             createUseCase: createMeeting,
             speechTranscriber: speechService,
-            notificationScheduler: notificationScheduler
+            notificationScheduler: notificationScheduler,
+            fileEncryption: fileEncryption
         )
 
         let createPersonal = CreatePersonalLogUseCaseImpl(repository: personalLogRepository)
