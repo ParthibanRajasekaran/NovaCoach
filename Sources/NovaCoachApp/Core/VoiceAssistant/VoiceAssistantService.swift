@@ -48,11 +48,23 @@ final class VoiceAssistantService: ObservableObject, VoiceAssistantManaging, @un
             if self.porcupineManager == nil {
                 // The Porcupine wake-word engine must be bundled with the app. Replace "HeyBuddy.ppn"
                 // with the generated model path to deploy a custom wake word.
-                self.porcupineManager = try? PorcupineManager(keywordPath: "HeyBuddy.ppn", onDetection: { [weak self] _ in
-                    self?.synthesizerSpeak("Listening")
-                })
+                do {
+                    self.porcupineManager = try PorcupineManager(keywordPath: "HeyBuddy.ppn", onDetection: { [weak self] _ in
+                        self?.synthesizerSpeak("Listening")
+                    })
+                } catch {
+                    print("Failed to initialize PorcupineManager: \(error)")
+                    self.synthesizerSpeak("Wake word detection is unavailable. Please check your app setup.")
+                    return
+                }
             }
-            try? self.porcupineManager?.start()
+            do {
+                try self.porcupineManager?.start()
+            } catch {
+                print("Failed to start PorcupineManager: \(error)")
+                self.synthesizerSpeak("Wake word detection could not be started.")
+                return
+            }
             #endif
         }
     }

@@ -61,12 +61,8 @@ final class OneOnOneListViewModel: ObservableObject {
     }
 
     private func saveTranscript(_ text: String) throws -> String {
-        guard let data = text.data(using: .utf8) else {
-            throw FileEncryptionError.invalidData
-        }
-        let filename = UUID().uuidString + ".enc"
-        let url = try fileEncryption.encryptAndSave(data, filename: filename)
-        return url.path
+        let identifier = UUID().uuidString
+        return try fileEncryption.encryptAndSave(text, identifier: identifier)
     }
 
     private func scheduleReminders(for items: [ActionItem]) async throws {

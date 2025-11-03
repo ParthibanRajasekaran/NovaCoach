@@ -17,6 +17,7 @@ final class AppCoordinator: ObservableObject {
     init() {
         speechService = SpeechService()
         notificationScheduler = NotificationScheduler()
+        let fileEncryption = FileEncryptionService(encryptionKeyProvider: KeychainService.shared)
 
         #if canImport(CoreData)
         let stack = CoreDataStack(encryptionKeyProvider: KeychainService.shared)
