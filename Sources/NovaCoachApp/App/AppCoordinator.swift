@@ -43,11 +43,13 @@ final class AppCoordinator: ObservableObject {
 
         let createMeeting = CreateOneOnOneUseCaseImpl(repository: oneOnOneRepository)
         let fetchMeetings = FetchOneOnOneUseCaseImpl(repository: oneOnOneRepository)
+        let fileEncryption = FileEncryptionService(keyProvider: KeychainService.shared)
         oneOnOneViewModel = OneOnOneListViewModel(
             fetchUseCase: fetchMeetings,
             createUseCase: createMeeting,
             speechTranscriber: speechService,
-            notificationScheduler: notificationScheduler
+            notificationScheduler: notificationScheduler,
+            fileEncryption: fileEncryption
         )
 
         let createPersonal = CreatePersonalLogUseCaseImpl(repository: personalLogRepository)
