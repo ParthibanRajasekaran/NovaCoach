@@ -36,8 +36,7 @@ struct RootTabView: View {
                 }
             }
             .accessibilityLabel("Voice Assistant")
-            .accessibilityHint("Double tap to toggle voice assistant on or off")
-            .accessibilityValue(isVoiceActive ? "Active" : "Inactive")
+            .accessibilityHint(isVoiceActive ? "Double tap to stop voice assistant" : "Double tap to start voice assistant")
             .accessibilityAddTraits(.isButton)
         }
     }
