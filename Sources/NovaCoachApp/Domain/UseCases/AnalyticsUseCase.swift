@@ -47,7 +47,7 @@ final class FetchAnalyticsSnapshotUseCaseImpl: FetchAnalyticsSnapshotUseCase, @u
                 expectedDate = Calendar.current.date(byAdding: .day, value: -1, to: expectedDate) ?? expectedDate
             } else if logDate == Calendar.current.date(byAdding: .day, value: -1, to: expectedDate) {
                 streak += 1
-                expectedDate = Calendar.current.date(byAdding: .day, value: -1, to: logDate) ?? logDate
+                expectedDate = Calendar.current.date(byAdding: .day, value: -1, to: expectedDate) ?? expectedDate
             } else {
                 break
             }
