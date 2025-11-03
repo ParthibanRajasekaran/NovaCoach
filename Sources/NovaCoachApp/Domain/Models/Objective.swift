@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Objective: Identifiable, Hashable {
+public struct Objective: Identifiable, Hashable, Sendable {
     public var id: UUID
     public var title: String
     public var detail: String?
@@ -39,7 +39,7 @@ public struct Objective: Identifiable, Hashable {
     }
 }
 
-public struct KeyResult: Identifiable, Hashable {
+public struct KeyResult: Identifiable, Hashable, Sendable {
     public var id: UUID
     public var title: String
     public var detail: String?
@@ -75,7 +75,7 @@ public struct KeyResult: Identifiable, Hashable {
     }
 }
 
-public struct ActionItem: Identifiable, Hashable {
+public struct ActionItem: Identifiable, Hashable, Sendable {
     public var id: UUID
     public var title: String
     public var detail: String?
@@ -115,7 +115,7 @@ public struct ActionItem: Identifiable, Hashable {
     }
 }
 
-public enum ActionItemStatus: String, CaseIterable, Identifiable {
+public enum ActionItemStatus: String, CaseIterable, Identifiable, Sendable {
     case pending
     case inProgress
     case completed
@@ -123,7 +123,7 @@ public enum ActionItemStatus: String, CaseIterable, Identifiable {
     public var id: String { rawValue }
 }
 
-public struct OneOnOneMeeting: Identifiable, Hashable {
+public struct OneOnOneMeeting: Identifiable, Hashable, Sendable {
     public var id: UUID
     public var meetingDate: Date
     public var counterpartName: String
@@ -154,7 +154,7 @@ public struct OneOnOneMeeting: Identifiable, Hashable {
     }
 }
 
-public struct PersonalLogEntry: Identifiable, Hashable {
+public struct PersonalLogEntry: Identifiable, Hashable, Sendable {
     public var id: UUID
     public var entryDate: Date
     public var plannedWork: String
@@ -185,7 +185,7 @@ public struct PersonalLogEntry: Identifiable, Hashable {
     }
 }
 
-public enum ReminderFrequency: String, CaseIterable, Identifiable {
+public enum ReminderFrequency: String, CaseIterable, Identifiable, Sendable {
     case daily
     case everyOtherDay
     case weekly
@@ -193,7 +193,7 @@ public enum ReminderFrequency: String, CaseIterable, Identifiable {
     public var id: String { rawValue }
 }
 
-public struct AnalyticsSnapshot {
+public struct AnalyticsSnapshot: Sendable {
     public var objectiveProgress: [Objective]
     public var completedActionItems: Int
     public var pendingActionItems: Int

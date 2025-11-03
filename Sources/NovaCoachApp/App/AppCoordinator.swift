@@ -1,3 +1,4 @@
+#if canImport(SwiftUI)
 import SwiftUI
 
 @MainActor
@@ -16,6 +17,7 @@ final class AppCoordinator: ObservableObject {
     init() {
         speechService = SpeechService()
         notificationScheduler = NotificationScheduler()
+        let fileEncryption = FileEncryptionService(encryptionKeyProvider: KeychainService.shared)
 
         #if canImport(CoreData)
         let stack = CoreDataStack(encryptionKeyProvider: KeychainService.shared)
@@ -42,11 +44,13 @@ final class AppCoordinator: ObservableObject {
 
         let createMeeting = CreateOneOnOneUseCaseImpl(repository: oneOnOneRepository)
         let fetchMeetings = FetchOneOnOneUseCaseImpl(repository: oneOnOneRepository)
+        let fileEncryption = FileEncryptionService(keyProvider: KeychainService.shared)
         oneOnOneViewModel = OneOnOneListViewModel(
             fetchUseCase: fetchMeetings,
             createUseCase: createMeeting,
             speechTranscriber: speechService,
-            notificationScheduler: notificationScheduler
+            notificationScheduler: notificationScheduler,
+            fileEncryption: fileEncryption
         )
 
         let createPersonal = CreatePersonalLogUseCaseImpl(repository: personalLogRepository)
@@ -83,3 +87,4 @@ final class AppCoordinator: ObservableObject {
         ])
     }
 }
+#endif

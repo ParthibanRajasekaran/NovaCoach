@@ -1,6 +1,7 @@
 import XCTest
 @testable import NovaCoachApp
 
+@MainActor
 final class ObjectiveUseCaseTests: XCTestCase {
     func testCreateObjectiveAddsToRepository() async throws {
         let repository = InMemoryObjectiveRepository()
@@ -32,5 +33,20 @@ final class ObjectiveUseCaseTests: XCTestCase {
         let snapshot = try await analytics.execute()
         XCTAssertEqual(snapshot.completedActionItems, 1)
         XCTAssertEqual(snapshot.pendingActionItems, 0)
+    }
+
+    func testUpdateKeyResultProgressClampsToTarget() async throws {
+        let repository = InMemoryObjectiveRepository()
+        let keyResult = KeyResult(title: "Adoption", targetValue: 100, currentValue: 10, unit: "%")
+        let objective = Objective(title: "Grow", startDate: Date(), endDate: Date(), keyResults: [keyResult])
+        try repository.createObjective(objective)
+
+        let updateUseCase = UpdateKeyResultProgressUseCaseImpl(repository: repository)
+        try await updateUseCase.execute(objectiveID: objective.id, keyResultID: keyResult.id, progress: 1.5)
+
+        let fetchUseCase = FetchObjectivesUseCaseImpl(repository: repository)
+        let updatedObjectives = try await fetchUseCase.execute()
+        let updatedValue = updatedObjectives.first?.keyResults.first?.currentValue
+        XCTAssertEqual(updatedValue, 100)
     }
 }

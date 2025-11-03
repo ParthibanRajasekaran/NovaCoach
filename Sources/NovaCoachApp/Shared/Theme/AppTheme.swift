@@ -1,10 +1,5 @@
+#if canImport(SwiftUI)
 import SwiftUI
-#if canImport(CoreHaptics)
-import CoreHaptics
-#endif
-#if canImport(UIKit)
-import UIKit
-#endif
 
 struct AppTheme {
     static let accent = Color("AccentColor", bundle: .module)
@@ -16,18 +11,13 @@ struct AppTheme {
         endPoint: .bottomTrailing
     )
 }
+#endif
+
+#if canImport(UIKit)
+import UIKit
+#endif
 
 struct HapticEngine {
-    #if canImport(CoreHaptics)
-    private static var engine: CHHapticEngine? = {
-        #if os(iOS)
-        return try? CHHapticEngine()
-        #else
-        return nil
-        #endif
-    }()
-    #endif
-
     static func success() {
         #if os(iOS)
         let generator = UINotificationFeedbackGenerator()

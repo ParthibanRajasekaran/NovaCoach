@@ -1,14 +1,16 @@
 import Foundation
 
+@MainActor
 protocol CreateOneOnOneUseCase {
     func execute(_ meeting: OneOnOneMeeting) async throws
 }
 
+@MainActor
 protocol FetchOneOnOneUseCase {
     func execute(filter: OneOnOneFilter) async throws -> [OneOnOneMeeting]
 }
 
-final class CreateOneOnOneUseCaseImpl: CreateOneOnOneUseCase {
+final class CreateOneOnOneUseCaseImpl: CreateOneOnOneUseCase, @unchecked Sendable {
     private let repository: OneOnOneRepository
 
     init(repository: OneOnOneRepository) {
@@ -16,20 +18,11 @@ final class CreateOneOnOneUseCaseImpl: CreateOneOnOneUseCase {
     }
 
     func execute(_ meeting: OneOnOneMeeting) async throws {
-        try await withCheckedThrowingContinuation { continuation in
-            DispatchQueue.global(qos: .userInitiated).async {
-                do {
-                    try self.repository.createMeeting(meeting)
-                    continuation.resume()
-                } catch {
-                    continuation.resume(throwing: error)
-                }
-            }
-        }
+        try repository.createMeeting(meeting)
     }
 }
 
-final class FetchOneOnOneUseCaseImpl: FetchOneOnOneUseCase {
+final class FetchOneOnOneUseCaseImpl: FetchOneOnOneUseCase, @unchecked Sendable {
     private let repository: OneOnOneRepository
 
     init(repository: OneOnOneRepository) {
@@ -37,15 +30,6 @@ final class FetchOneOnOneUseCaseImpl: FetchOneOnOneUseCase {
     }
 
     func execute(filter: OneOnOneFilter) async throws -> [OneOnOneMeeting] {
-        try await withCheckedThrowingContinuation { continuation in
-            DispatchQueue.global(qos: .userInitiated).async {
-                do {
-                    let meetings = try self.repository.fetchMeetings(filter: filter)
-                    continuation.resume(returning: meetings)
-                } catch {
-                    continuation.resume(throwing: error)
-                }
-            }
-        }
+        try repository.fetchMeetings(filter: filter)
     }
 }

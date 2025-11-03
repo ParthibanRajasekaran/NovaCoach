@@ -1,3 +1,4 @@
+#if canImport(SwiftUI)
 import SwiftUI
 
 struct GlassBackground: ViewModifier {
@@ -15,9 +16,12 @@ struct GlassBackground: ViewModifier {
             )
     }
 }
+#endif
 
+#if canImport(SwiftUI)
 extension View {
     func glassBackground() -> some View {
         modifier(GlassBackground())
     }
 }
+#endif

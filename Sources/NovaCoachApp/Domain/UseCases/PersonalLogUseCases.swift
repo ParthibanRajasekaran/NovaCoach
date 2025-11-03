@@ -1,14 +1,16 @@
 import Foundation
 
+@MainActor
 protocol CreatePersonalLogUseCase {
     func execute(_ entry: PersonalLogEntry) async throws
 }
 
+@MainActor
 protocol FetchPersonalLogsUseCase {
     func execute() async throws -> [PersonalLogEntry]
 }
 
-final class CreatePersonalLogUseCaseImpl: CreatePersonalLogUseCase {
+final class CreatePersonalLogUseCaseImpl: CreatePersonalLogUseCase, @unchecked Sendable {
     private let repository: PersonalLogRepository
 
     init(repository: PersonalLogRepository) {
@@ -16,20 +18,11 @@ final class CreatePersonalLogUseCaseImpl: CreatePersonalLogUseCase {
     }
 
     func execute(_ entry: PersonalLogEntry) async throws {
-        try await withCheckedThrowingContinuation { continuation in
-            DispatchQueue.global(qos: .userInitiated).async {
-                do {
-                    try self.repository.createLog(entry)
-                    continuation.resume()
-                } catch {
-                    continuation.resume(throwing: error)
-                }
-            }
-        }
+        try repository.createLog(entry)
     }
 }
 
-final class FetchPersonalLogsUseCaseImpl: FetchPersonalLogsUseCase {
+final class FetchPersonalLogsUseCaseImpl: FetchPersonalLogsUseCase, @unchecked Sendable {
     private let repository: PersonalLogRepository
 
     init(repository: PersonalLogRepository) {
@@ -37,15 +30,6 @@ final class FetchPersonalLogsUseCaseImpl: FetchPersonalLogsUseCase {
     }
 
     func execute() async throws -> [PersonalLogEntry] {
-        try await withCheckedThrowingContinuation { continuation in
-            DispatchQueue.global(qos: .userInitiated).async {
-                do {
-                    let logs = try self.repository.fetchLogs()
-                    continuation.resume(returning: logs)
-                } catch {
-                    continuation.resume(throwing: error)
-                }
-            }
-        }
+        try repository.fetchLogs()
     }
 }

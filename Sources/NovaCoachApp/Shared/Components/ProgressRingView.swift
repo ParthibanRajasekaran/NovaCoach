@@ -1,3 +1,4 @@
+#if canImport(SwiftUI)
 import SwiftUI
 
 struct ProgressRingView: View {
@@ -27,3 +28,4 @@ struct ProgressRingView: View {
         .padding()
     }
 }
+#endif

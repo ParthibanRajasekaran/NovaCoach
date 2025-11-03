@@ -1,3 +1,4 @@
+#if canImport(SwiftUI)
 import SwiftUI
 
 struct AnalyticsDashboardView: View {
@@ -33,6 +34,7 @@ struct AnalyticsDashboardView: View {
         }
     }
 }
+
 
 private struct ProgressSection: View {
     let snapshot: AnalyticsSnapshot
@@ -101,3 +103,5 @@ private struct ReflectionStreakView: View {
         .glassBackground()
     }
 }
+
+#endif

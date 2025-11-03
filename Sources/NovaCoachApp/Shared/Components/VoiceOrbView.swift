@@ -1,3 +1,4 @@
+#if canImport(SwiftUI)
 import SwiftUI
 
 struct VoiceOrbView: View {
@@ -18,3 +19,4 @@ struct VoiceOrbView: View {
             .accessibilityLabel(assistant.isListening ? "Assistant listening" : "Assistant idle")
     }
 }
+#endif

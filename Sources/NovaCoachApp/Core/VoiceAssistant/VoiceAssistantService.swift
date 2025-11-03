@@ -1,9 +1,12 @@
 import Foundation
+#if canImport(OSLog)
+import OSLog
+#endif
 #if canImport(Porcupine)
 import Porcupine
 #endif
 
-public struct VoiceCommand: Identifiable, Hashable {
+public struct VoiceCommand: Identifiable {
     public let id = UUID()
     public var phrase: String
     public var action: () -> Void
@@ -17,13 +20,16 @@ protocol VoiceAssistantManaging: AnyObject {
     func stop()
 }
 
-final class VoiceAssistantService: ObservableObject, VoiceAssistantManaging {
+final class VoiceAssistantService: ObservableObject, VoiceAssistantManaging, @unchecked Sendable {
     @Published private(set) var isListening: Bool = false
     let wakeWord: String
     private var commands: [VoiceCommand] = []
     private let speechTranscriber: SpeechTranscribing
     private let synthesizer: SpeechSynthesizing
     private let queue = DispatchQueue(label: "com.novacoach.voiceassistant")
+    #if canImport(OSLog)
+    private let logger = Logger(subsystem: "com.novacoach.app", category: "VoiceAssistant")
+    #endif
     #if canImport(Porcupine)
     private var porcupineManager: PorcupineManager?
     #endif
@@ -48,11 +54,23 @@ final class VoiceAssistantService: ObservableObject, VoiceAssistantManaging {
             if self.porcupineManager == nil {
                 // The Porcupine wake-word engine must be bundled with the app. Replace "HeyBuddy.ppn"
                 // with the generated model path to deploy a custom wake word.
-                self.porcupineManager = try? PorcupineManager(keywordPath: "HeyBuddy.ppn", onDetection: { [weak self] _ in
-                    self?.synthesizerSpeak("Listening")
-                })
+                do {
+                    self.porcupineManager = try PorcupineManager(keywordPath: "HeyBuddy.ppn", onDetection: { [weak self] _ in
+                        self?.synthesizerSpeak("Listening")
+                    })
+                } catch {
+                    self.logError("Failed to initialize PorcupineManager: \(error.localizedDescription)")
+                    self.synthesizerSpeak("Wake word detection is unavailable. Please check your app setup.")
+                    return
+                }
             }
-            try? self.porcupineManager?.start()
+            do {
+                try self.porcupineManager?.start()
+            } catch {
+                self.logError("Failed to start PorcupineManager: \(error.localizedDescription)")
+                self.synthesizerSpeak("Wake word detection could not be started.")
+                return
+            }
             #endif
         }
     }
@@ -80,5 +98,13 @@ final class VoiceAssistantService: ObservableObject, VoiceAssistantManaging {
 
     private func synthesizerSpeak(_ text: String) {
         Task { await synthesizer.speak(text) }
+    }
+    
+    private func logError(_ message: String) {
+        #if canImport(OSLog)
+        logger.error("\(message)")
+        #else
+        print("ERROR: \(message)")
+        #endif
     }
 }

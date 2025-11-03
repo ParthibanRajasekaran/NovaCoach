@@ -12,6 +12,7 @@ enum KeychainError: Error {
     case dataEncoding
 }
 
+@MainActor
 final class KeychainService: EncryptionKeyProviding {
     static let shared = KeychainService()
     private let service = "com.novacoach.keychain"
@@ -40,13 +41,8 @@ final class KeychainService: EncryptionKeyProviding {
             return buffer
         }
         #endif
-        var fallback = Data(count: 64)
-        fallback.withUnsafeMutableBytes { ptr in
-            for index in 0..<64 {
-                ptr[index] = UInt8.random(in: .min ... .max)
-            }
-        }
-        return fallback
+        let randomBytes = (0..<64).map { _ in UInt8.random(in: .min ... .max) }
+        return Data(randomBytes)
     }
 
     private func readKey(identifier: String) throws -> Data {

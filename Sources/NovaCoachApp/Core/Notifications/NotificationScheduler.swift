@@ -3,6 +3,11 @@ import Foundation
 import UserNotifications
 #endif
 
+enum NotificationSchedulerError: Error {
+    case authorizationDenied
+}
+
+@MainActor
 protocol NotificationScheduling {
     func scheduleReminder(identifier: String, title: String, body: String, date: Date) async throws
     func cancel(identifier: String) async
@@ -13,7 +18,7 @@ final class NotificationScheduler: NotificationScheduling {
         #if canImport(UserNotifications)
         let center = UNUserNotificationCenter.current()
         let granted = try await center.requestAuthorization(options: [.alert, .sound, .badge])
-        guard granted else { return }
+        guard granted else { throw NotificationSchedulerError.authorizationDenied }
         let content = UNMutableNotificationContent()
         content.title = title
         content.body = body

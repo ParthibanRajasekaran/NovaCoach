@@ -1,3 +1,4 @@
+#if canImport(SwiftUI)
 import SwiftUI
 
 struct OneOnOneListView: View {
@@ -77,7 +78,6 @@ struct OneOnOneListView: View {
         }
     }
 }
-
 private struct CreateOneOnOneView: View {
     @Binding var isPresented: Bool
     var onSave: (Date, String, String?, String?, URL?, [ActionItem]) -> Void
@@ -174,3 +174,5 @@ private struct OneOnOneDetailView: View {
         .navigationTitle("10:10 Summary")
     }
 }
+
+#endif

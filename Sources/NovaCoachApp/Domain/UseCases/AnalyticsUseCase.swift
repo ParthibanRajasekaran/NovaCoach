@@ -1,10 +1,11 @@
 import Foundation
 
+@MainActor
 protocol FetchAnalyticsSnapshotUseCase {
     func execute() async throws -> AnalyticsSnapshot
 }
 
-final class FetchAnalyticsSnapshotUseCaseImpl: FetchAnalyticsSnapshotUseCase {
+final class FetchAnalyticsSnapshotUseCaseImpl: FetchAnalyticsSnapshotUseCase, @unchecked Sendable {
     private let objectiveRepository: ObjectiveRepository
     private let actionItemRepository: ActionItemRepository
     private let personalLogRepository: PersonalLogRepository
@@ -20,27 +21,18 @@ final class FetchAnalyticsSnapshotUseCaseImpl: FetchAnalyticsSnapshotUseCase {
     }
 
     func execute() async throws -> AnalyticsSnapshot {
-        try await withCheckedThrowingContinuation { continuation in
-            DispatchQueue.global(qos: .userInitiated).async {
-                do {
-                    let objectives = try self.objectiveRepository.fetchObjectives()
-                    let actionItems = try self.actionItemRepository.fetchActionItems()
-                    let logs = try self.personalLogRepository.fetchLogs()
-                    let completed = actionItems.filter { $0.status == .completed }.count
-                    let pending = actionItems.count - completed
-                    let streak = Self.calculateStreak(from: logs)
-                    let snapshot = AnalyticsSnapshot(
-                        objectiveProgress: objectives,
-                        completedActionItems: completed,
-                        pendingActionItems: pending,
-                        reflectionStreak: streak
-                    )
-                    continuation.resume(returning: snapshot)
-                } catch {
-                    continuation.resume(throwing: error)
-                }
-            }
-        }
+        let objectives = try objectiveRepository.fetchObjectives()
+        let actionItems = try actionItemRepository.fetchActionItems()
+        let logs = try personalLogRepository.fetchLogs()
+        let completed = actionItems.filter { $0.status == .completed }.count
+        let pending = actionItems.count - completed
+        let streak = Self.calculateStreak(from: logs)
+        return AnalyticsSnapshot(
+            objectiveProgress: objectives,
+            completedActionItems: completed,
+            pendingActionItems: pending,
+            reflectionStreak: streak
+        )
     }
 
     private static func calculateStreak(from logs: [PersonalLogEntry]) -> Int {
@@ -55,7 +47,7 @@ final class FetchAnalyticsSnapshotUseCaseImpl: FetchAnalyticsSnapshotUseCase {
                 expectedDate = Calendar.current.date(byAdding: .day, value: -1, to: expectedDate) ?? expectedDate
             } else if logDate == Calendar.current.date(byAdding: .day, value: -1, to: expectedDate) {
                 streak += 1
-                expectedDate = Calendar.current.date(byAdding: .day, value: -1, to: logDate) ?? logDate
+                expectedDate = Calendar.current.date(byAdding: .day, value: -1, to: expectedDate) ?? expectedDate
             } else {
                 break
             }

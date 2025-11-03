@@ -1,3 +1,4 @@
+#if canImport(SwiftUI)
 import SwiftUI
 
 struct ObjectiveDashboardView: View {
@@ -50,6 +51,7 @@ struct ObjectiveDashboardView: View {
         }
     }
 }
+
 
 private struct ObjectiveCardView: View {
     let objective: Objective
@@ -150,3 +152,4 @@ private struct CreateObjectiveView: View {
         }
     }
 }
+#endif

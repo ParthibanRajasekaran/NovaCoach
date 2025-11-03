@@ -1,5 +1,7 @@
 import Foundation
+#if canImport(Combine)
 import Combine
+#endif
 
 @MainActor
 final class ObjectiveDashboardViewModel: ObservableObject {

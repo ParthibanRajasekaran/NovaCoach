@@ -2,10 +2,6 @@
 import CoreData
 import OSLog
 
-protocol EncryptionKeyProviding {
-    func loadOrCreateKey(identifier: String) throws -> Data
-}
-
 final class CoreDataStack: ObservableObject {
     static let modelName = "NovaCoach"
     private static let storeFileName = "NovaCoach.sqlite"

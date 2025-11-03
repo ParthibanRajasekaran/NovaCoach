@@ -13,11 +13,7 @@ let package = Package(
             targets: ["NovaCoachApp"]
         )
     ],
-    dependencies: [
-        .package(url: "https://github.com/Quick/Quick.git", from: "7.0.0"),
-        .package(url: "https://github.com/Quick/Nimble.git", from: "13.0.0"),
-        .package(url: "https://github.com/pointfreeco/swift-snapshot-testing.git", from: "1.12.0")
-    ],
+    dependencies: [],
     targets: [
         .target(
             name: "NovaCoachApp",
@@ -33,9 +29,7 @@ let package = Package(
         .testTarget(
             name: "NovaCoachAppTests",
             dependencies: [
-                "NovaCoachApp",
-                "Quick",
-                "Nimble"
+                "NovaCoachApp"
             ],
             path: "Tests/NovaCoachAppTests"
         )

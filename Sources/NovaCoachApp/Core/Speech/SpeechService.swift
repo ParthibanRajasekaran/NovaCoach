@@ -6,10 +6,12 @@ import Speech
 import AVFoundation
 #endif
 
+@MainActor
 protocol SpeechTranscribing {
     func transcribeAudio(at url: URL) async throws -> String
 }
 
+@MainActor
 protocol SpeechSynthesizing {
     func speak(_ text: String) async
 }
